@@ -71,14 +71,11 @@ m2 %>%
   broom::tidy(exponentiate = T, conf.int=T) %>% 
   mutate(across(where(is.numeric), ~round(.x,digits=2))) 
 
-str(m2)
-
 ################################################################################
 # 「|」 の意味は「ごとに」
 ################################################################################
 
 # 「| Subject」は　「Subjectごとに」という意味
-
 f3 = Reaction ~ Days | Subject
 lattice::xyplot(f3, sleepstudy, type=c("p", "r"),
        subset=Subject %in% c(370, 371,372))
@@ -177,11 +174,21 @@ summary(m5)
 
 # 方法1
 cc <- confint(m5,parm='beta_')
+# (If you want faster-but-less-accurate Wald confidence intervals you can use 
+# confint(gm1,parm="beta_",method="Wald") instead
 ctab <- cbind(est=fixef(m5), cc)
 rtab <- exp(ctab)
 print(rtab, digits=3)
 
 # 方法2
+# defaultはWald
+m5 %>% 
+  broom.mixed::tidy(conf.int=TRUE,exponentiate=TRUE,effects="fixed") %>% 
+  mutate(across(where(is.numeric), ~round(.x,digits=3))) 
+
+# ,conf.method="profile"をつけるとaccurateに
 m5 %>% 
   broom.mixed::tidy(conf.int=TRUE,exponentiate=TRUE,effects="fixed",conf.method="profile") %>% 
   mutate(across(where(is.numeric), ~round(.x,digits=3))) 
+
+# 以上
